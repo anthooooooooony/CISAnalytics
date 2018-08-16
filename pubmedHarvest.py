@@ -41,7 +41,7 @@ def extraction(http):
         return
 
     for key in all_auths:
-        if 'university of melbourne' and 'computing and information systems' or 'cis' in all_auths[key].lower():
+        if 'university of melbourne' and ('computing and information systems' or 'cis') in all_auths[key].lower():
             target_index.append(key)
     if not target_index:
         return
