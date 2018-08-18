@@ -1,4 +1,5 @@
 import pycouchdb
+import pandas as pd
 from util import text_processing
 
 server = pycouchdb.Server('http://admin:11112222@localhost:5984/')
@@ -30,11 +31,13 @@ tf = tf_vectorizer.fit_transform(abstract_list)
 
 from sklearn.decomposition import LatentDirichletAllocation
 n_topics = 30
+
+"""
 lda = LatentDirichletAllocation(n_topics=n_topics,
                                 max_iter=50,
                                 learning_method='batch')
 lda.fit(tf)
-
+"""
 
 def print_top_words(model, feature_names, n_top_words):
     for topic_idx, topic in enumerate(model.components_):
@@ -45,18 +48,21 @@ def print_top_words(model, feature_names, n_top_words):
 
 n_top_words = 20
 tf_feature_names = tf_vectorizer.get_feature_names()
-print_top_words(lda, tf_feature_names, n_top_words)
+#print_top_words(lda, tf_feature_names, n_top_words)
 
 
 from sklearn.model_selection import GridSearchCV
-parameters = {'learning_method':('batch', 'online'),
-              'n_topics':range(30, 75, 5),
+
+parameters = {
+              'learning_method': ('batch', 'online'),
+              'n_components': range(30, 75, 5),
               'perp_tol': (0.001, 0.01, 0.1),
-              'doc_topic_prior':(0.001, 0.01, 0.05, 0.1, 0.2),
-              'topic_word_prior':(0.001, 0.01, 0.05, 0.1, 0.2),
-              'max_iter':(200, 300, 400)}
+              'doc_topic_prior': (0.001, 0.01, 0.05, 0.1, 0.2),
+              'topic_word_prior': (0.001, 0.01, 0.05, 0.1, 0.2)
+              }
 lda = LatentDirichletAllocation()
-model = GridSearchCV(lda, parameters)
+model = GridSearchCV(lda, parameters, verbose=2)
 model.fit(tf)
 
-print sorted(model.cv_results_.keys())
+df = pd.DataFrame.from_dict(model.cv_results_)
+print df.sort_values(by='rank_test_score')
