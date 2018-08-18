@@ -8,8 +8,6 @@ import time
 from multiprocessing import Pool
 import pycouchdb as couchdb
 
-start_time = time.time()
-
 home_page = 'https://www.ncbi.nlm.nih.gov/pubmed/'
 url = "https://www.ncbi.nlm.nih.gov/pubmed/?" \
       "term=computing+and+information+systems+university+of+melbourne"
