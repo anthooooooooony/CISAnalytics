@@ -23,7 +23,7 @@ def text_processing(text):
     filtered = [w for w, pos in refiltered if pos.startswith('NN')]
 
     # Stemming
-    ps = PorterStemmer()
-    filtered = [ps.stem(w) for w in filtered]
+    #ps = PorterStemmer()
+    #filtered = [ps.stem(w) for w in filtered]
 
     return " ".join(filtered)
