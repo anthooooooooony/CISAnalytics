@@ -18,18 +18,18 @@ import pycouchdb as couchdb
 #sys.getdefaultencoding()
 
 
-def getTitles():
+def getPaper():
     server = couchdb.Server('http://admin:11112222@localhost:5984/')
     db = server.database('paper_cis')
 
     l = []
-    paper_list = list(db.query("testing/Titles"))
+    paper_list = list(db.query("testing/AllPaper"))
     for paper in paper_list:
         l.append(paper['key'])
-
     return l
 
 
+'''
 def getLinks():
 
     title_list = getTitles()
@@ -58,8 +58,106 @@ def extraction(link):
     page = urlopen(link)
     soup = BeautifulSoup(page, 'html.parser')
 
+'''
 
-getLinks()
+
+experts_url = 'https://findanexpert.unimelb.edu.au/display/org4257'
+
+
+
+expert_dict = {}
+experts_page = urlopen(experts_url)
+soup = BeautifulSoup(experts_page, 'html.parser')
+for item in soup.find('ul', {'class': 'property-list'}).findAll('li'):
+    a = item.find('a', href=True)
+    expert_dict[a.text] = a['href']
+
+
+def get_author_page(author, expert_dict):
+    author = author.split()
+    compile_author = author[1] + '\w* ' + author[0]
+    for key in expert_dict.keys():
+        if re.search(r'' + compile_author, key):
+            return key, expert_dict[key]
+
+
+def extration(url, title):
+
+    def tag_extraction(paper_url):
+        page = urlopen(paper_url)
+        soup = BeautifulSoup(page, 'html.parser')
+        articles = soup.find('section', {'class': 'property-group'})\
+            .findAll('article', {'class': 'property'})
+        for article in articles:
+            if article.find('h3').text.strip() == 'Has subject area':
+                tag_dict = {}
+                for subclass in article.findAll('li', {'class': 'subclass'}):
+                    l = []
+                    for listitem in subclass.findAll('a'):
+                        l.append(listitem.text)
+                    tag_dict.setdefault(subclass.find('h3').text, l)
+                return tag_dict
+
+    page = urlopen(url)
+    soup = BeautifulSoup(page, 'html.parser')
+    sections = soup.findAll('section', {'class': 'property-group'})
+    for section in sections:
+        if section.find('h2').text == 'Publications':
+            papers = section.findAll('li', {'role': 'listitem'})
+            for paper in papers:
+                paper_title = paper.find('a').text.strip().strip('.')
+                if re.search(title.strip('.'), paper_title, re.I):
+                    href = paper.find('a', href=True)['href']
+                    href = href.replace('individual', 'display')
+                    href = 'https://findanexpert.unimelb.edu.au/' + href
+                    tags = tag_extraction(href)
+                    return tags
+
+            #return
+
+    #for item in soup.find('ul', {'class': 'property-list'}).findAll('li', {'role': 'listitem'}):
+    #    print item
+
+
+title_tags = {}
+
+paper_list = getPaper()
+for paper in paper_list:
+    print paper['title']
+    author_list = paper['author(s)']
+    for author in author_list:
+        try:
+            a, b = get_author_page(author, expert_dict)
+        except TypeError:
+            continue
+        #
+        b = b.replace('individual', 'display')
+        author_url = 'https://findanexpert.unimelb.edu.au' + b + '#tab-publications'
+        title = paper['title']
+        tags = extration(author_url, title)
+        paper.setdefault('tags', tags)
+        del paper['_rev']
+        del paper['_id']
+        break
+
+
+couchserver = couchdb.Server('http://admin:11112222@localhost:5984/')
+dbname = 'tag_paper'
+if dbname in couchserver:
+    db = couchserver.database(dbname)
+else:
+    db = couchserver.create(dbname)
+
+count_multipro = 1
+for item_rslt in paper_list:
+    if item_rslt is not None:
+        db.save(item_rslt)
+
+
+
+
+
+
 
 
 
