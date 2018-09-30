@@ -1,4 +1,4 @@
-from urllib.request import urlopen
+from urllib2 import urlopen
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
@@ -7,6 +7,8 @@ import re
 import time
 from multiprocessing import Pool
 import pycouchdb as couchdb
+
+start_time = time.time()
 
 home_page = 'https://www.ncbi.nlm.nih.gov/pubmed/'
 url = "https://www.ncbi.nlm.nih.gov/pubmed/?" \
@@ -21,6 +23,7 @@ link_no = 1
 
 
 def extraction(http):
+    #print 'url: {}'.format(http)
     page = urlopen(http)
     soup = BeautifulSoup(page, 'html.parser')
     pub = {}
@@ -37,12 +40,16 @@ def extraction(http):
                 pass
     except AttributeError:
         return
+    #print 'afflist: {}'.format(all_auths)
 
     for key in all_auths:
-        if 'university of melbourne' and ('computing and information systems' or 'cis') in all_auths[key].lower():
+        if re.search(r'computing (&|and) information systems', all_auths[key], re.I) \
+                and re.search(r'university of melbourne', all_auths[key], re.I):
+
             target_index.append(key)
     if not target_index:
         return
+    #print 'target index: {}'.format(target_index)
 
 # get Author step 2
 # get List index
@@ -75,6 +82,7 @@ def extraction(http):
                 target_auth.append(author)
     if not target_auth:
         return
+    print 'target authors: {}'.format(target_auth)
     pub.update({'author(s)': target_auth})
 
 # get Title
@@ -127,8 +135,9 @@ def get_link():
     return link_list
 
 
-browser = webdriver.Chrome('/Users/lanzzzzl/chromedriver')
+browser = webdriver.Chrome()
 browser.get(url)
+
 while count <= last_page:
     all_links += get_link()
     count += 1
@@ -139,8 +148,9 @@ records = p.map(extraction, all_links)
 p.terminate()
 p.join()
 
-couchserver = couchdb.Server('http://127.0.0.1:5984')
-dbname = 'data'
+
+couchserver = couchdb.Server('http://admin:11112222@localhost:5984/')
+dbname = 'paper_cis'
 if dbname in couchserver:
     db = couchserver.database(dbname)
 else:
@@ -153,4 +163,4 @@ for item_rslt in records:
         db.save(final_rslt)
 
 
-# print((time.time()-start_time)/60)
+print((time.time()-start_time)/60)
