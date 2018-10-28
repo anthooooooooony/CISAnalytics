@@ -1,5 +1,6 @@
 
-from urllib2 import Request, urlopen
+from urllib2 import urlopen
+import requests
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -20,7 +21,7 @@ import pycouchdb as couchdb
 
 def getPaper():
     server = couchdb.Server('http://admin:11112222@localhost:5984/')
-    db = server.database('paper_cis')
+    db = server.database('paper_cis_replicate')
 
     l = []
     paper_list = list(db.query("testing/AllPaper"))
@@ -84,8 +85,14 @@ def get_author_page(author, expert_dict):
 def extration(url, title):
 
     def tag_extraction(paper_url):
-        page = urlopen(paper_url)
-        soup = BeautifulSoup(page, 'html.parser')
+        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36'}
+        try:
+            page = requests.get(paper_url, headers=headers, timeout=5)
+        except:
+            print 'Error! Skip'
+            return {}
+
+        soup = BeautifulSoup(page.text, 'html.parser')
         articles = soup.find('section', {'class': 'property-group'})\
             .findAll('article', {'class': 'property'})
         for article in articles:
@@ -106,7 +113,7 @@ def extration(url, title):
             papers = section.findAll('li', {'role': 'listitem'})
             for paper in papers:
                 paper_title = paper.find('a').text.strip().strip('.')
-                if re.search(title.strip('.'), paper_title, re.I):
+                if re.search(re.escape(title.strip('.')), paper_title, re.I):
                     href = paper.find('a', href=True)['href']
                     href = href.replace('individual', 'display')
                     href = 'https://findanexpert.unimelb.edu.au/' + href
