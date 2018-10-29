@@ -1,6 +1,6 @@
 1. Run following command in terminal
 
-python -m SimpleHTTPServer 8000
+  python -m SimpleHTTPServer 8000
 
 2. Input following address in a browser
 
