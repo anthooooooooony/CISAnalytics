@@ -2,7 +2,7 @@
 
   python -m SimpleHTTPServer 8000
 
-2. Input following address in a browser
+2. Input following address in a browser to see visualisation
 
 ### CIS Netowrk
 
