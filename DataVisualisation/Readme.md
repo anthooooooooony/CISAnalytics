@@ -1,8 +1,8 @@
-Run following command in terminal
+1. Run following command in terminal
 
 python -m SimpleHTTPServer 8000
 
-Input following address in a browser
+2. Input following address in a browser
 
 ### CIS Netowrk
 
