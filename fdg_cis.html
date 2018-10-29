@@ -59,26 +59,25 @@
 
 	//Create an SVG element and append it to the DOM
 	var svgElement = d3.select("body")
-						.append("svg")
-						.attr({"width": width+margin.left+margin.right, "height": height+margin.top+margin.bottom})
-						.attr("transform","translate(" + (-50) +"," + 0 +")")
-						.style("float", "right")
-						.call(
-							d3.behavior.zoom()
-								.on("zoom", function(){ 
-									return svgElement
-											.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")");
-										})
-						)
-						.append("g");
+				.append("svg")
+				.attr({"width": width+margin.left+margin.right, "height": height+margin.top+margin.bottom})
+				.attr("transform","translate(" + (-50) +"," + 0 +")")
+				.style("float", "right")
+				.call(
+					d3.behavior.zoom()
+					.on("zoom", function(){ 
+						return svgElement
+							.attr("transform", "translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")");})
+				)
+				.append("g");
 
 	var svgElement2 = d3.select("#barchart");
 	g2 = svgElement2.append("g").attr("transform", "translate(" + 50 + "," + 100 + ")");
 
 	var tooltip = d3.select("body")
-					.append("div")
-					.attr("class", "tooltip")
-					.style("visibility", "visible");	
+			.append("div")
+			.attr("class", "tooltip")
+			.style("visibility", "visible");	
 
 
 	//Load External Data
@@ -99,12 +98,12 @@
 
 		//Create Force Layout
 		var force = d3.layout.force()
-						.size([width, height])
-						.nodes(nodes)
-						.links(links)
-						.gravity(0.045)
-						.charge(-50)
-						.linkDistance(200);
+				.size([width, height])
+				.nodes(nodes)
+				.links(links)
+				.gravity(0.045)
+				.charge(-50)
+				.linkDistance(200);
 
 		//set link attributes
 		var link = svgElement.selectAll(".link")
@@ -126,38 +125,38 @@
 
 		//Add labels to each node
 		var label = node.append("text")
-						.attr("class", "label")
-						.attr("dx", 12)
-						.attr("dy", "0.35em")
-						.attr("font-size", function(d){ return d.papers>5 ? 9: 9; })
-						.text(function(d){ return d.name; });
+				.attr("class", "label")
+				.attr("dx", 12)
+				.attr("dy", "0.35em")
+				.attr("font-size", function(d){ return d.papers>5 ? 9: 9; })
+				.text(function(d){ return d.name; });
 
 		//Add circles to each node
 		var circle = node.append("circle")
-						.attr("r", function(d){ return d.papers>5 ? d.papers/2 : 5; })
-						.attr("fill", function(d){
-							if (d.code == -1)
-								return "black"
-							else
-								return c20(d.code); 
-						})
-						.attr("stroke", "#ccc")
-						.on("click", function(d){ 
-							return selected(d);
-						})
-						.on("mousemove", function(d){
-							tooltip.style("left", (d3.event.pageX + 10) + "px")
-								.style("top", (d3.event.pageY + 10) + "px");
-						})
-						.on("mouseover", function(d) {
-							tooltip.html(d.name+ "<br/>" + d.papers).style("left", (d3.event.pageX + 10) + "px")
-								.style("top", (d3.event.pageY + 10) + "px")
-								.style("visibility", "visible");
-						})
-						.on("mouseout", function(d) {
-							tooltip.style("visibility", "hidden");
-							d3.select(this).classed("hovered", false);
-						});
+				.attr("r", function(d){ return d.papers>5 ? d.papers/2 : 5; })
+				.attr("fill", function(d){
+					if (d.code == -1)
+						return "black"
+					else
+						return c20(d.code); 
+				})
+				.attr("stroke", "#ccc")
+				.on("click", function(d){ 
+					return selected(d);
+				})
+				.on("mousemove", function(d){
+					tooltip.style("left", (d3.event.pageX + 10) + "px")
+						.style("top", (d3.event.pageY + 10) + "px");
+				})
+				.on("mouseover", function(d) {
+					tooltip.html(d.name+ "<br/>" + d.papers).style("left", (d3.event.pageX + 10) + "px")
+						.style("top", (d3.event.pageY + 10) + "px")
+						.style("visibility", "visible");
+				})
+				.on("mouseout", function(d) {
+					tooltip.style("visibility", "hidden");
+					d3.select(this).classed("hovered", false);
+				});
 
 		//reset to deselect any node
 		d3.select("#clear").on("click", function(){ 
@@ -171,8 +170,7 @@
 				.filter(function(o) {
 					if (o.name.toLowerCase() == academic)
 						selected(o);
-				})
-				;
+				});
 		}
 
 		b_height = 20;
@@ -259,9 +257,7 @@
 			d3.selectAll(".bartext").remove()
 
 			d3.selectAll("circle")
-				.style("fill-opacity", 1)
-				//.style("stroke-opacity", 1)
-				;
+				.style("fill-opacity", 1);
 
 			d3.selectAll("line")
 				.style("stroke-opacity", 1)
