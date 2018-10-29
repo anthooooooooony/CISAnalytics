@@ -2,4 +2,6 @@
 
 ## COMP90019 Software Development Project
 
-Supervised by Richard Sinnott
+by Minghang Chi & Lan Zhou
+
+Supervisor: Richard Sinnott
